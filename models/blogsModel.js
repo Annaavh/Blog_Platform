@@ -2,6 +2,11 @@ import mongoose from "mongoose";
 
 
 const blogSchema = mongoose.Schema({
+    user_id: {
+        type: mongoose.Schema.Types.ObjectId,
+        required: true,
+        ref: "Users"
+    },
     title: {
         type: String,
         required: [true, "Please add the blog title"]
@@ -11,8 +16,7 @@ const blogSchema = mongoose.Schema({
         required: [true, "Please add the blog description"]
     },
     author: {
-        type: String,
-        required: [true, "Please add the blog author"]
+        type: String
     },
     created_at: {
         type: Date,
@@ -26,7 +30,8 @@ const blogSchema = mongoose.Schema({
         _id: mongoose.Schema.Types.ObjectId,
         content: String,
         author: String,
-        created_at:Date
+        user_id: mongoose.Schema.Types.ObjectId,
+        created_at: Date
     }]
 
 });

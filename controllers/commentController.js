@@ -5,21 +5,25 @@ import Blog from "../models/blogsModel.js";
 const { OK, VALIDATION_ERROR, NOT_FOUND, SERVER_ERROR } = constants;
 
 export const createComment = async (req, res) => {
-    try {
-        const { content, author } = req.body;
-        const { id } = req.params;
 
-        if (!content || !author) {
+    try {
+
+        const { content } = req.body;
+        const { id } = req.params;
+        const {username} = req.user;
+
+        if (!content) {
             return res.status(VALIDATION_ERROR).json({ error: "All fields are mandatory!" });
         }
 
-        const comment = new Comment({ content, author, blog: id });
+        const comment = new Comment({ content, author:username, blog: id,user_id:req.user.id });
         const blog = await Blog.findById(id);
 
         if (!blog) {
             res.status(NOT_FOUND).json({ error: "Blog is not found" });
             return;
         }
+     
 
         blog.comments.push(comment);
         await comment.save();
@@ -37,12 +41,6 @@ export const deleteComment = async (req, res) => {
     const { id, commentId } = req.params;
 
     try {
-        const comment = await Comment.findById(commentId);
-        if (!comment) {
-            res.status(NOT_FOUND).json({ error: "Comment not found" });
-            return;
-        }
-        await Comment.deleteOne({ _id: req.params.id });
 
         const updatedBlog = await Blog.findByIdAndUpdate(
             id,
@@ -50,9 +48,7 @@ export const deleteComment = async (req, res) => {
             { new: true }
         );
 
-        if (!updatedBlog) {
-            return res.status(NOT_FOUND).json({ error: "Blog is not found" });
-        }
+        await Comment.deleteOne({ _id: req.params.id });
 
         res.status(OK).json({ message: "Comment deleted successfully", updatedBlog });
     } catch (error) {

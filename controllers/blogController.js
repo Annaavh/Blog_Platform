@@ -16,19 +16,19 @@ export const getBlogs = async (req, res) => {
 
 
 export const createBlog = async (req, res) => {
-
+    const { title, body } = req.body;
+    const { username } = req.user;
     try {
-        const { title, body, author } = req.body;
 
-        if (!title || !body || !author) {
-            res.status(VALIDATION_ERROR).json({error:"All fields are mandatory !"});
+        if (!title || !body) {
+            res.status(VALIDATION_ERROR).json({ error: "All fields are mandatory !" });
         }
         const blog = await Blog.create({
-            title, body, author
+            title, body, author: username, user_id: req.user.id
         })
         res.status(OK).json(blog)
     } catch (error) {
-        console.error(error);
+        console.log(error);
         res.status(SERVER_ERROR).json({ error: 'Internal server error' });
     }
 
@@ -54,7 +54,6 @@ export const getSingleBlog = async (req, res) => {
 export const updateBlog = async (req, res) => {
 
     try {
-        const blog = await findBlog(req.params.id, res);
         const updatedFields = {
             ...req.body, updated_at: new Date()
         }
